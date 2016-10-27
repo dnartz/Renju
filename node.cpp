@@ -1,16 +1,18 @@
 #include "node.h"
 
+#include <iterator>
+
 namespace renju {
 
 node::node():
 x(0),
 y(0)
 {
-    auto begin = this->board.begin(),
+    auto it = this->board.begin(),
          end = this->board.end();
 
-    while (begin < end) {
-        (begin++)->fill(board_status::null);
+    while (it != end) {
+        (it++)->fill(board_status::null);
     }
 }
 
@@ -33,14 +35,14 @@ bool node::is_overline(int x, int y) {
 
     this->board[x][y] = board_status::black;
 
-    int x1, y1, x2, y2, xv1, yv1, xv2, yv2, nblack;
+    int x1, y1, x2, y2, xv2, yv2, nblack;
 
     // 对于棋盘上任意一个位置,它拥有8个相邻的位置(边界的位置例外)。
     // 从一个位置转移到相邻的位置,需要对行、列坐标加一,减一或者不变。
     const int dir_vector[] = {-1, 0, 1};
 
-    for (xv1 : dir_vector) {
-        for (yv1 : dir_vector) {
+    for (int xv1 : dir_vector) {
+        for (int yv1 : dir_vector) {
             // 两个方向向量都为0的情况显然应该略过。
             // 由于对称性的原因,我们只要遍历xv1和yv1全部排列中的一半即可。
             if (yv1 < xv1 || (xv1 == 0 && yv1 == 0)) {
@@ -85,8 +87,81 @@ bool node::is_overline(int x, int y) {
         return result;
 }
 
+// TODO
+bool node::is_44(int x, int y) {
+    return false;
+}
+
+// TODO
+bool node::is_33(int x, int y) {
+    return false;
+}
+
 bool node::is_forbidden(int x, int y) {
     return this->is_overline(x, y) || this->is_44(x, y) || this->is_33(x, y);
+}
+
+
+    // 模式数组，用于估值函数的模式匹配。
+    // 0-空闲或者禁手
+    // 1-我方棋子
+    // 2-对手棋子
+    static std::pair<std::vector<int>, int> rate_patterns[] = {
+            {{2, 1, 1, 1, 0}, 30000}
+    };
+int64_t node::rating() {}
+
+bool node::find_pattern(
+        int x,
+        int y,
+        const std::vector<int> &pattern,
+        board_status color)
+{
+    const int dir_vector[] = {-1, 0, 1};
+
+    for (int xv : dir_vector) {
+    for (int yv: dir_vector) {
+
+    if (yv == 0 && xv == 0) {
+        continue;
+    }
+
+    for (int reverse = 0; reverse < 2; ++reverse) {
+        auto it = pattern.begin(), end = pattern.end();
+
+        int i = x, j = y, match = 0;
+
+        auto opponent = this->trans_player(color);
+
+        while (it != end &&
+               i >= 0 && i < BOARD_SIZE &&
+               j >= 0 && j < BOARD_SIZE)
+        {
+            if (this->board[i][j] == color && *it == 1 ||
+                ((this->board[i][j] == board_status::null ||
+                 this->board[i][j] == board_status::forbid &&
+                 color == board_status::white) &&
+                 *it == 0) ||
+                (this->board[i][j] == opponent && *it == 2))
+            {
+                match++;
+            } else {
+                break;
+            }
+
+            it++;
+            i += xv;
+            j += yv;
+        }
+
+        if (match == pattern.size()) {
+            return true;
+        }
+    }
+    }
+    }
+
+    return false;
 }
 
 }

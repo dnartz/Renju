@@ -3,6 +3,8 @@
 
 #include <cstdint>
 #include <array>
+#include <vector>
+#include <utility>
 
 #define BOARD_SIZE 15
 
@@ -38,6 +40,13 @@ public:
     bool is_overline(int x, int y);
     bool is_44(int x, int y);
     bool is_33(int x, int y);
+
+    int64_t rating();
+    bool find_pattern(
+            int x,
+            int y,
+            const std::vector<int> & pattern,
+            board_status color);
 
 private:
     board_t board;
