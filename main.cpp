@@ -151,28 +151,24 @@ void init()
 //游戏的主过程
 void playGame(int i, int j)
 {
-    if (whoseTurn == 0)
+    addToMap(currentMap, i, j, whoseTurn);
+
+    hand++;
+
+    if (LinkF5(i - 1, j - 1, currentMap))
     {
-        addToMap(currentMap, i, j, whoseTurn);
-
-        hand++;
-
-        if (LinkF5(i - 1, j - 1, currentMap))
-        {
-            // 对手赢了
-            win = 1;
-            return;
-        }
-        whoseTurn = 1;
+        // 对手赢了
+        win = 1;
+        return;
     }
-    else
-    {
-        cut = 0;
-        computer_think();
+    whoseTurn = 1;
 
-        hand++;
-        whoseTurn = 0;
-    }
+    cut = 0;
+    computer_think();
+
+    hand++;
+    whoseTurn = 0;
+
     if (hand > 100)
         win = 3;
 }
