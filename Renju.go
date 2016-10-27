@@ -1,6 +1,6 @@
-package Renju
-
 // +build !windows
+package main
+
 // #cgo LDFLAGS: -L ./  -lRenju -lstdc++
 // #include "chess.h"
 import "C"
