@@ -46,8 +46,11 @@ int win;					//记录是不是已经分出胜负，0表示人赢了，1表示计
 int hand;					//记录一共走了几手棋。
 int cut;					//记录一共剪了多少次枝
 
-void initMap();
-void playGame();
+extern "C" {
+    void initMap();
+    void playGame(int i, int j);
+}
+
 void drawMap(Map, int, int);
 void addToMap(Map, int, int, int);
 void computer_think();
@@ -112,17 +115,9 @@ void drawMap(Map map, char m_i, char m_j)
 }
 
 //棋盘中加入一个棋子，加入成功，返回true，否则返回false
-bool addToMap(Map &map, char m_i, char m_j, int whoseTurn)
+void addToMap(Map &map, int i, int j, int whoseTurn)
 {
-    int i = m_i >= 'A' ? (int)(m_i - 'A' + 10) : m_i - '0';
-    int j = m_j >= 'A' ? (int)(m_j - 'A' + 10) : m_j - '0';
-    if ((i > 0 && i < 16 && j > 0 && j < 16) && map[i - 1][j - 1] == 0)
-    {
-        map[i - 1][j - 1] = whoseTurn + 1;
-        return true;
-    }
-    else
-        return false;
+    map[i - 1][j - 1] = whoseTurn + 1;
 }
 
 //初始化棋盘
@@ -154,67 +149,32 @@ void init()
 }
 
 //游戏的主过程
-void playGame()
+void playGame(int i, int j)
 {
-    while (win == 0)
+    if (whoseTurn == 0)
     {
-        if (whoseTurn == 0)
-        {
-            bool inputCorrect;
-            char p_i; char p_j;
-            do
-            {
-                cout << "请输入落子的坐标：(X,Y)" << endl;
-                cout << "输入q退出游戏" << endl;
+        addToMap(currentMap, i, j, whoseTurn);
 
-                cin >> p_i;
-                if (p_i == 'q' || p_i == 'Q')
-                {
-                    cout << "退出游戏" << endl;
-                    return;
-                }
-                cin >> p_j;
-                if (p_j == 'q' || p_j == 'Q')
-                {
-                    cout << "退出游戏" << endl;
-                    return;
-                }
+        hand++;
 
-                inputCorrect = addToMap(currentMap, p_i, p_j, whoseTurn);
-            }while (!inputCorrect);
-            drawMap(currentMap, p_i, p_j);
-            hand++;
-            int pos_x, pos_y;
-            pos_x = (('0' < p_i) && ('9' >= p_i)) ? p_i - 48 : p_i - 'A' + 10;
-            pos_y = (('0' < p_j) && ('9' >= p_j)) ? p_j - 48 : p_j - 'A' + 10;
-            if (LinkF5(pos_x - 1, pos_y - 1, currentMap))
-            {
-                win = 1;
-                break;
-            }
-            whoseTurn = 1;
-        }
-        else
+        if (LinkF5(i - 1, j - 1, currentMap))
         {
-            cout << "计算机在思考。。。" << endl;
-            cut = 0;
-            computer_think();
-            cout << "cut = " << cut << endl;
-            hand++;
-            whoseTurn = 0;
+            // 对手赢了
+            win = 1;
+            return;
         }
-        if (hand > 100)
-            win = 3;
+        whoseTurn = 1;
     }
-    switch (win)
+    else
     {
-        case 1:cout << "你赢了!" << endl; break;
-        case 2:cout << "我赢了!" << endl; break;
-        case 3:cout << "百手和棋!" << endl; break;
+        cut = 0;
+        computer_think();
+
+        hand++;
+        whoseTurn = 0;
     }
-    cout << "\n游戏结束，感谢您的参与。" << endl;
-    char c;
-    cin >> c;
+    if (hand > 100)
+        win = 3;
 }
 
 void computer_think()
@@ -235,34 +195,17 @@ void computer_think()
         char x, y;
         x = thinkTree->firstPoint[0] < 10 ? thinkTree->firstPoint[0] + '0' : thinkTree->firstPoint[0] - 10 + 'A';
         y = thinkTree->firstPoint[1] < 10 ? thinkTree->firstPoint[1] + '0' : thinkTree->firstPoint[1] - 10 + 'A';
-        addToMap(currentMap, x, y, whoseTurn);
+        addToMap(currentMap, thinkTree->firstPoint[0], thinkTree->firstPoint[1], whoseTurn);
         drawMap(currentMap, x, y);
         if (LinkF5(thinkTree->firstPoint[0] - 1, thinkTree->firstPoint[1] - 1, currentMap))
             win = 2;
     }
     else
     {
-        cout << "找不到下棋的位置!" << endl;
+        // 找不到下棋的位置
         win = 1;
     }
     clear(thinkTree);
-}
-
-void print(Tree* pTree)
-{
-    cout << (int)pTree->childs.size() << endl;
-    int count = 0;
-    for (vector<Tree*>::iterator it = pTree->childs.begin(); it != pTree->childs.end(); it++, count++)
-    {
-        cout << "\n---------------------------\n";
-        cout << count << ":" << (*it)->point[0] << (*it)->point[1];
-//		for (int i = 0; i < 15; i++)
-//		{
-//			for (int j = 0; j < 15; j++)
-//				cout << (*it)->map[i][j] << ' ';
-//			cout << endl;
-//		}
-    }
 }
 
 void alpha_beta(Tree* pTree)
@@ -479,26 +422,6 @@ void scanMap(Tree *&pTree, int turn)
     }
 }
 
-//判断各个优先级的位置
-/*
-int LinkSS4(int x,int y, Map map);	211110 or 211101 or 211011
-									210111 or 11110 or 11101
-									11011 or 10111
-int LinkSS3(int x,int y, Map map);	211100 or 211010 or 211001
-									210110 or 210101 or 21011
-									11100 or 10110 or 10011
-									10101
-int LinkS5(int x,int y, Map map);	1011101
-int LinkS4(int x,int y, Map map);	1010101
-int LinkS3(int x,int y, Map map);	1010100
-int LinkF5(int x,int y, Map map);	11111
-int LinkF4(int x,int y, Map map);	11110
-int LinkF3(int x,int y, Map map);	011100 or 010110
-int LinkF2(int x,int y, Map map);	011000 or 010100 or 010010
-int LinkF1(int x,int y, Map map);	1
-30000,10000,10000,10000,5000,5000,5000,5000,500,200,200,100,100,100,50,50,10
-成5，活4，双冲4，双跳冲四，冲四+跳四，冲四+活三，跳四+活三，双活三，跳4，冲四，活三，双死三，双跳三，多活二，活二，冲三，活一
-*/
 int PriorityGet(int i, int j, int level, Map map)
 {
     switch(level)
@@ -1109,6 +1032,14 @@ int LinkF1(int x,int y, Map map)
 int main()
 {
     init();
-    playGame();
+
+    int i, j;
+
+    while (win == 0) {
+        cin >> i;
+        cin >>j;
+        playGame(i, j);
+    }
+
     return 0;
 }
