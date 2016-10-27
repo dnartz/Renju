@@ -3,5 +3,5 @@ project(Renju)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SOURCE_FILES main.cpp node.cpp node.h)
+set(SOURCE_FILES main.cpp)
 add_executable(Renju ${SOURCE_FILES})
