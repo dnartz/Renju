@@ -2,8 +2,9 @@ package Renju
 
 // #cgo: CFLAGS: -O2 -lRenju
 // #include "chess.h"
+import "C"
+
 import (
-	"C"
 	"fmt"
 )
 

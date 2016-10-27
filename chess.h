@@ -1,11 +1,12 @@
 #ifndef RENJU_CHESS_H
 #define RENJU_CHESS_H
 
-#include <ctime>
-#include <vector>
 #include <stdlib.h>
 
 #ifdef __cplusplus
+#include <ctime>
+#include <vector>
+
 extern "C" {
 #endif
 
