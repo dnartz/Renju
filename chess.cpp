@@ -54,10 +54,13 @@ void addToMap(Map &map, int i, int j, int whoseTurn)
 }
 
 //初始化棋盘
-void initMap()
+void initMap(int w)
 {
-    cout << "选择人先手（0），计算机先手（1）：";
-    cin >> whoseTurn;
+    whoseTurn = w;
+    srand((unsigned int)time(NULL));
+    hand = 0;
+    win = -1;
+
     for (int i = 0; i < 15; i++)
         for (int j = 0; j < 15; j++)
             currentMap[i][j] = 0;
@@ -70,15 +73,6 @@ void initMap()
     }
     else
         drawMap(currentMap, '0', '0');
-}
-
-//整个程序的初始化
-void init()
-{
-    srand((unsigned int)time(NULL));
-    hand = 0;
-    initMap();
-    win = false;
 }
 
 //游戏的主过程
@@ -101,9 +95,6 @@ void playGame(int i, int j)
 
     hand++;
     whoseTurn = 0;
-
-    if (hand > 100)
-        win = 3;
 }
 
 void computer_think()
@@ -125,6 +116,9 @@ void computer_think()
         x = thinkTree->firstPoint[0] < 10 ? thinkTree->firstPoint[0] + '0' : thinkTree->firstPoint[0] - 10 + 'A';
         y = thinkTree->firstPoint[1] < 10 ? thinkTree->firstPoint[1] + '0' : thinkTree->firstPoint[1] - 10 + 'A';
         addToMap(currentMap, thinkTree->firstPoint[0], thinkTree->firstPoint[1], whoseTurn);
+        lastStep[0] = x;
+        lastStep[1] = y;
+
         drawMap(currentMap, x, y);
         if (LinkF5(thinkTree->firstPoint[0] - 1, thinkTree->firstPoint[1] - 1, currentMap))
             win = 2;

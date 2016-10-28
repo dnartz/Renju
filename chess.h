@@ -10,8 +10,10 @@
 extern "C" {
 #endif
 
-    void initMap();
+    void initMap(int w);
     void playGame(int i, int j);
+
+    int lastStep[2];
     int win;					//记录是不是已经分出胜负，0表示人赢了，1表示计算机赢了
 
 #ifdef __cplusplus
