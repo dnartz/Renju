@@ -89,7 +89,7 @@ func makeMove(msg message) message {
 	}
 
 	lastStep := msg.Body.Steps[len(msg.Body.Steps) - 1]
-	C.playGame(C.int(lastStep.Y - 1), C.int(lastStep.X - 1))
+	C.playGame(C.int(lastStep.Y), C.int(lastStep.X))
 
 	newStep.Time = time.Now().Format("20160417161058")
 	if whoseTurn == 0 {
@@ -97,8 +97,8 @@ func makeMove(msg message) message {
 	} else {
 		newStep.Side = "b"
 	}
-	newStep.X = int(C.lastStep[1]) + 1
-	newStep.Y = int(C.lastStep[0]) + 1
+	newStep.X = int(C.lastStep[1])
+	newStep.Y = int(C.lastStep[0])
 	newMsg.Body.Steps = []action{newStep}
 
 	return newMsg
@@ -114,9 +114,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	var msg message
 
-	err = json.Unmarshal(body, &msg)
-	if err != nil {
-		log.Fatal(err)
+	if err = json.Unmarshal(body, &msg); err != nil {
+		fmt.Fprintf(w, "%s", "")
+		return
+	}
+
+	if msg.Head.Msg_type == 0 && whoseTurn != -1 {
+		fmt.Fprint(w, "")
+		log.Println("Duplicated control pack.")
 		return
 	}
 
