@@ -3,6 +3,7 @@ package main
 
 // #cgo LDFLAGS: -L ./  -lRenju -lstdc++
 // #include "chess.h"
+// #include <string.h>
 import "C"
 
 import (
@@ -49,6 +50,23 @@ type message struct {
 // 谁先手：1为我方（我方执黑），0为对手（我方执白）
 var whoseTurn int = -1
 
+func fillBoard(steps[] action) {
+	var ourColor string
+	if whoseTurn == 1 {
+		ourColor = "b"
+	} else {
+		ourColor = "w"
+	}
+
+	for _, step := range steps {
+		if step.Side == ourColor {
+			C.currentMap[step.Y - 1][step.X - 1] = 2
+		} else {
+			C.currentMap[step.Y - 1][step.X - 1] = 1
+		}
+	}
+}
+
 var msgTemplate message
 
 func setPlayerInfo(msg message) (string, error) {
@@ -72,6 +90,10 @@ func setPlayerInfo(msg message) (string, error) {
 }
 
 func makeMove(msg message) message {
+	if msg.Body.Steps != nil {
+		fillBoard(msg.Body.Steps)
+	}
+
 	var newStep action
 	newMsg := msgTemplate
 

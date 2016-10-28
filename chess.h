@@ -14,14 +14,14 @@ extern "C" {
     void playGame(int i, int j);
 
     int lastStep[2];
-    int win;					//记录是不是已经分出胜负，0表示人赢了，1表示计算机赢了
+    typedef int Map[15][15];
+    Map currentMap;	//记录当前的棋形,0表示还没有棋子，1表示人的棋子，2表示计算机的棋子
+    int win;		//记录是不是已经分出胜负，0表示人赢了，1表示计算机赢了
 
 #ifdef __cplusplus
 }
 
 using namespace std;
-
-typedef int Map[15][15];
 
 const int MIN = -1000000;
 const int MAX = 1000000;
@@ -45,7 +45,6 @@ struct Tree
     bool cut;				//标记这个节点是否被剪枝
 };
 
-Map currentMap;				//记录当前的棋形,0表示还没有棋子，1表示人的棋子，2表示计算机的棋子
 int whoseTurn;				//0表示到人走，1表示到计算机走
 int hand;					//记录一共走了几手棋。
 int cut;					//记录一共剪了多少次枝

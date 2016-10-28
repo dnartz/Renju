@@ -13,8 +13,9 @@
 
 #include <iostream>
 #include <ctime>
+#include <cstring>
 #include <vector>
-#include<stdlib.h>
+#include <stdlib.h>
 
 #include "chess.h"
 
@@ -129,6 +130,8 @@ void computer_think()
         win = 1;
     }
     clear(thinkTree);
+
+    memset(static_cast<void *>(currentMap), 0, sizeof(currentMap));
 }
 
 void alpha_beta(Tree* pTree)
