@@ -116,8 +116,8 @@ void computer_think()
         x = thinkTree->firstPoint[0] < 10 ? thinkTree->firstPoint[0] + '0' : thinkTree->firstPoint[0] - 10 + 'A';
         y = thinkTree->firstPoint[1] < 10 ? thinkTree->firstPoint[1] + '0' : thinkTree->firstPoint[1] - 10 + 'A';
         addToMap(currentMap, thinkTree->firstPoint[0], thinkTree->firstPoint[1], whoseTurn);
-        lastStep[0] = x;
-        lastStep[1] = y;
+        lastStep[0] = thinkTree->firstPoint[0];
+        lastStep[1] = thinkTree->firstPoint[1];
 
         drawMap(currentMap, x, y);
         if (LinkF5(thinkTree->firstPoint[0] - 1, thinkTree->firstPoint[1] - 1, currentMap))

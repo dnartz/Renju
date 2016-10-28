@@ -64,10 +64,10 @@ func setPlayerInfo(msg message) (string, error) {
 		msgTemplate = msg
 		C.initMap(C.int(whoseTurn))
 
-		return result, nil
+		return string(result), nil
 	} else {
 		log.Fatal(err)
-		return nil, err
+		return "", err
 	}
 }
 
@@ -77,13 +77,13 @@ func makeMove(msg message) message {
 
 	// 如果是我们下第一步，在调用了C++的initMap之后就已经下完第一步（天元）了。
 	// 在这里我们直接返回
-	if len(msg.Body.Steps) == 0 {
+	if msg.Body.Steps == nil || len(msg.Body.Steps) == 0 {
 		newStep.Side = "b"
 		newStep.Time = time.Now().Format("20160417161058")
 		newStep.X = 8
 		newStep.Y = 8
 
-		newMsg.Body.Steps[0] = newStep
+		newMsg.Body.Steps = []action{newStep}
 
 		return newMsg;
 	}
@@ -97,8 +97,8 @@ func makeMove(msg message) message {
 	} else {
 		newStep.Side = "b"
 	}
-	newStep.X = C.lastStep[1]
-	newStep.Y = C.lastStep[0]
+	newStep.X = int(C.lastStep[1]) + 1
+	newStep.Y = int(C.lastStep[0]) + 1
 	newMsg.Body.Steps = []action{newStep}
 
 	return newMsg
@@ -110,6 +110,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 		return
 	}
+	fmt.Printf("%s\n", body)
 
 	var msg message
 
@@ -124,12 +125,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if (whoseTurn == -1) {
 		res, err = setPlayerInfo(msg)
 	} else {
-		res = makeMove(msg)
+		msg = makeMove(msg)
+		var buf []byte
+		buf, err = json.Marshal(msg)
+
+		res = string(buf)
 	}
 
 	if err != nil {
 		log.Fatal(err)
 	} else {
+		fmt.Printf("%s\n", res)
 		fmt.Fprintf(w, "%s", res)
 
 		// 如果得出胜负，比赛已分，那么恢复到初始状态
